@@ -1,6 +1,9 @@
 import { Product } from 'src/modules/products/entities/product-entity';
 import { CreateProductDto } from 'src/modules/products/dto/create-product.dto';
 import { UpdateProductDto } from 'src/modules/products/dto/update-product.dto';
+import * as mysql from 'mysql2/promise';
+import { Global, Module } from '@nestjs/common';
+import { DatabaseService } from 'src/database/database/database.service';
 
 export const mockCountResponse = 10;
 export const mockCompanyId = '94';

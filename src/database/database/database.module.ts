@@ -4,7 +4,7 @@ import { configDotenv } from 'dotenv';
 
 configDotenv();
 
-const databaseProvider = {
+export const databaseProvider = {
   provide: 'DATABASE_CONNECTION',
   useFactory: async () => {
     return mysql.createConnection({
@@ -12,14 +12,14 @@ const databaseProvider = {
       user: process.env.USER,
       port: parseInt(process.env.DBPORT),
       password: process.env.DBPASSWORD,
-      database: process.env.DB,
+      database: process.env.DB
     });
-  },
+  }
 };
 
 @Global()
 @Module({
   providers: [databaseProvider],
-  exports: ['DATABASE_CONNECTION'],
+  exports: ['DATABASE_CONNECTION']
 })
 export class DatabaseModule {}

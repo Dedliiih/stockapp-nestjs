@@ -8,14 +8,14 @@ import {
   mockProductList,
   affectedRowsResponse,
   createProductMock,
-  updateProductMock,
-} from '../../utils/mocks';
+  updateProductMock
+} from '../../utils/productMocks';
 import ProductsRepository from 'src/modules/products/repository/products.repository';
 
 const mockDatabaseService = {
   insertData: jest.fn(),
   getData: jest.fn(),
-  deleteData: jest.fn(),
+  deleteData: jest.fn()
 };
 
 describe('ProductsRepository', () => {
@@ -27,9 +27,9 @@ describe('ProductsRepository', () => {
         ProductsRepository,
         {
           provide: DatabaseService,
-          useValue: mockDatabaseService,
-        },
-      ],
+          useValue: mockDatabaseService
+        }
+      ]
     }).compile();
 
     repository = module.get<ProductsRepository>(ProductsRepository);
@@ -94,7 +94,7 @@ describe('ProductsRepository', () => {
         mockParams.search,
         mockParams.search,
         mockParams.limit,
-        mockItemsOffset,
+        mockItemsOffset
       ];
       mockDatabaseService.getData.mockResolvedValue(mockProductList);
       const result = await repository.getBySearchBar(mockCompanyId, mockParams);
@@ -115,7 +115,7 @@ describe('ProductsRepository', () => {
         createProductMock.sku,
         createProductMock.stock,
         createProductMock.category,
-        createProductMock.price,
+        createProductMock.price
       ];
 
       mockDatabaseService.insertData.mockResolvedValue(affectedRowsResponse);
@@ -138,7 +138,7 @@ describe('ProductsRepository', () => {
         updateProductMock.category,
         updateProductMock.price,
         mockProductId,
-        mockCompanyId,
+        mockCompanyId
       ];
 
       mockDatabaseService.insertData.mockResolvedValue(affectedRowsResponse);

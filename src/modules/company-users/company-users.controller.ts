@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Patch, Req, UseGuards, Body } from '@nestjs/common';
 import { CompanyUsersService } from './company-users.service';
-import { AuthGuard } from '@guards/auth.guard';
-import { RolesGuard } from '@guards/roles.guard';
+import { AuthGuard } from 'src/common/guards/auth.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Role } from 'src/common/enums/role.enum';
 import { Roles } from 'src/common/decorators/roles.decorator';
 

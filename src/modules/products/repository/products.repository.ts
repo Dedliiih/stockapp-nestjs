@@ -39,7 +39,7 @@ class ProductsRepository implements ProductsRepositoryI {
       params.search,
       params.search,
       params.limit,
-      itemsOffset,
+      itemsOffset
     ];
 
     const query = `
@@ -76,7 +76,7 @@ class ProductsRepository implements ProductsRepositoryI {
       productData.sku,
       productData.stock,
       productData.category,
-      productData.price,
+      productData.price
     ];
     return await this.databaseService.insertData(query, params);
   }
@@ -92,7 +92,7 @@ class ProductsRepository implements ProductsRepositoryI {
       productData.category,
       productData.price,
       productId,
-      companyId,
+      companyId
     ];
     return await this.databaseService.insertData(query, params);
   }

@@ -13,7 +13,7 @@ import {
   createProductMock,
   updateProductMock,
   mockProductsRepository
-} from '../../utils/mocks';
+} from '../../utils/productMocks';
 
 describe('ProductsService', () => {
   let service: ProductsService;

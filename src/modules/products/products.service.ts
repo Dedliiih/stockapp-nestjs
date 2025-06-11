@@ -42,14 +42,16 @@ export class ProductsService {
     return { data: products, total: productsTotal };
   }
 
-  async update(productId: string, updateProductDto: UpdateProductDto, companyId: string): Promise<void> {
+  async update(productId: string, updateProductDto: UpdateProductDto, companyId: string): Promise<ResultSetHeader> {
     const result: ResultSetHeader = await this.productsRepository.updateProduct(productId, updateProductDto, companyId);
     if (result.affectedRows === 0) throw new NotFoundException('El producto no fue encontrado.');
+    return result;
   }
 
-  async remove(productId: string, companyId: string): Promise<void> {
+  async remove(productId: string, companyId: string): Promise<ResultSetHeader> {
     const result: ResultSetHeader = await this.productsRepository.deleteProduct(productId, companyId);
     if (result.affectedRows === 0)
       throw new NotFoundException('El producto no ha podido ser eliminado. Intente de nuevo más tarde.');
+    return result;
   }
 }

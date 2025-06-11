@@ -1,8 +1,8 @@
 import { Controller, Post, Body, Req, UseGuards, Patch, Delete } from '@nestjs/common';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { CompaniesService } from './companies.service';
-import { AuthGuard } from '@guards/auth.guard';
-import { RolesGuard } from '@guards/roles.guard';
+import { AuthGuard } from 'src/common/guards/auth.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from 'src/common/enums/role.enum';
 import { AuthService } from '../auth/auth.service';
@@ -12,7 +12,7 @@ import { UpdateCompanyDto } from './dto/update-company.dto';
 export class CompaniesController {
   constructor(
     private readonly companiesService: CompaniesService,
-    private readonly authService: AuthService,
+    private readonly authService: AuthService
   ) {}
 
   @UseGuards(AuthGuard)

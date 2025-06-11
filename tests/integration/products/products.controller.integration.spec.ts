@@ -14,9 +14,9 @@ import {
   mockCompanyId,
   mockProductId,
   affectedRowsResponse
-} from '../utils/mocks';
+} from '../../utils/productMocks';
 import { CreateProductDto } from 'src/modules/products/dto/create-product.dto';
-import { mockProductsRepository } from '../utils/mocks';
+import { mockProductsRepository } from '../../utils/productMocks';
 import { ResultSetHeader } from 'mysql2';
 
 const MOCK_USER_PAYLOAD = {
@@ -130,7 +130,8 @@ describe('ProductsController (Integration)', () => {
   describe('PUT /products (updateProduct)', () => {
     it('A product should be updated using productsService with the new data to overwrite an existing product by id', async () => {
       const updateProductSpy = jest.spyOn(productsService, 'update').mockImplementation(async () => {
-        return;
+        const mockResponse = affectedRowsResponse as ResultSetHeader;
+        return mockResponse;
       });
 
       const response = await request(app.getHttpServer())
@@ -162,7 +163,8 @@ describe('ProductsController (Integration)', () => {
   describe('DELETE /products (deleteProduct)', () => {
     it('The productsService should delete a product by id', async () => {
       const deleteProductSpy = jest.spyOn(productsService, 'remove').mockImplementation(async () => {
-        return;
+        const mockResponse = affectedRowsResponse as ResultSetHeader;
+        return mockResponse;
       });
 
       const response = await request(app.getHttpServer()).delete(`/products/${mockProductId}`).expect(200);

@@ -11,12 +11,12 @@ import { ProductDto } from './dto/product.dto';
 import { TransformResponse } from 'src/common/decorators/transform-response.decorator';
 import { PaginatedServiceResponse } from 'src/common/interceptors/transform-response.interceptor';
 
+@UseGuards(AuthGuard, RolesGuard)
+@Roles(Role.Ceo, Role.StockController, Role.Admin)
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.Ceo, Role.StockController, Role.Admin)
   @Post()
   async create(
     @Req() req: { user?: { companyId: string } },
@@ -28,8 +28,6 @@ export class ProductsController {
     return { message: 'Producto añadido correctamente.' };
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.Ceo, Role.StockController, Role.Admin)
   @Get()
   @TransformResponse(ProductDto, 'products')
   async findAll(
@@ -40,8 +38,6 @@ export class ProductsController {
     return await this.productsService.getProducts(companyId, params);
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.Ceo, Role.StockController, Role.Admin)
   @Get('/search')
   @TransformResponse(ProductDto, 'products')
   async findBySearchBar(
@@ -52,15 +48,11 @@ export class ProductsController {
     return await this.productsService.findBySearchBar(companyId, params);
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.Ceo, Role.StockController, Role.Admin)
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return await this.productsService.findOne(id);
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.Ceo, Role.StockController, Role.Admin)
   @Put(':id')
   async update(
     @Req() req: { user?: { companyId: string } },
@@ -72,8 +64,6 @@ export class ProductsController {
     return { message: 'Producto actualizado correctamente.' };
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.Ceo, Role.StockController, Role.Admin)
   @Delete(':id')
   async remove(
     @Req() req: { user?: { companyId: string } },

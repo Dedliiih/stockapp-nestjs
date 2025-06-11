@@ -14,7 +14,7 @@ const mockProductsService = {
   findBySearchBar: jest.fn(),
   update: jest.fn(),
   remove: jest.fn(),
-  create: jest.fn(),
+  create: jest.fn()
 };
 
 const mockAuthGuard = { canActivate: jest.fn(() => true) };
@@ -29,9 +29,9 @@ describe('ProductsController', () => {
       providers: [
         {
           provide: ProductsService,
-          useValue: mockProductsService,
-        },
-      ],
+          useValue: mockProductsService
+        }
+      ]
     })
       .overrideGuard(AuthGuard)
       .useValue(mockAuthGuard)
@@ -58,7 +58,7 @@ describe('ProductsController', () => {
 
       const mockParams: GetProductsParamsDto = {
         page: 1,
-        limit: 10,
+        limit: 10
       };
 
       const mockServiceResponse: PaginatedServiceResponse<Product> = {
@@ -70,10 +70,10 @@ describe('ProductsController', () => {
             precio: 100,
             categoria: 'Electronica',
             sku: 'SKU',
-            stock: 10,
-          },
+            stock: 10
+          }
         ],
-        total: 1,
+        total: 1
       };
 
       mockProductsService.getProducts.mockResolvedValue(mockServiceResponse);
@@ -94,7 +94,7 @@ describe('ProductsController', () => {
       const mockParams: GetProductsParamsDto = {
         search: 'Electrónica',
         page: 1,
-        limit: 10,
+        limit: 10
       };
 
       const mockServiceResponse: PaginatedServiceResponse<Product> = {
@@ -106,10 +106,10 @@ describe('ProductsController', () => {
             precio: 100,
             categoria: 'Electronica',
             sku: 'SKU',
-            stock: 10,
-          },
+            stock: 10
+          }
         ],
-        total: 1,
+        total: 1
       };
 
       mockProductsService.findBySearchBar.mockResolvedValue(mockServiceResponse);
@@ -130,7 +130,7 @@ describe('ProductsController', () => {
       const mockProductId = '108';
 
       const mockServiceResponse: { message: string } = {
-        message: 'Producto actualizado correctamente.',
+        message: 'Producto actualizado correctamente.'
       };
 
       const updateProductMock: UpdateProductDto = {
@@ -139,7 +139,7 @@ describe('ProductsController', () => {
         price: 120,
         category: 2,
         sku: 'new sku',
-        stock: 10,
+        stock: 10
       };
 
       mockProductsService.update.mockResolvedValue(mockServiceResponse);
@@ -160,7 +160,7 @@ describe('ProductsController', () => {
       const mockProductId = '108';
 
       const mockServiceResponse: { message: string } = {
-        message: 'Producto eliminado.',
+        message: 'Producto eliminado.'
       };
 
       mockProductsService.remove.mockResolvedValue(mockServiceResponse);
@@ -185,11 +185,11 @@ describe('ProductsController', () => {
         category: 2,
         sku: 'new sku',
         stock: 10,
-        company: '94',
+        company: '94'
       };
 
       const mockServiceResponse: { message: string } = {
-        message: 'Producto añadido correctamente.',
+        message: 'Producto añadido correctamente.'
       };
 
       mockProductsService.create.mockResolvedValue(mockServiceResponse);
