@@ -4,6 +4,8 @@ import { AppModule } from './app.module';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { CORS_CONFIG } from './config/cors.config';
 import { ResponseTransformInterceptor } from './common/interceptors/transform-response.interceptor';
+import { swaggerConfig } from './config/swagger.config';
+import { SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
@@ -14,10 +16,12 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-      transform: true,
-    }),
+      transform: true
+    })
   );
 
+  const documentFactory = () => SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api-docs', app, documentFactory);
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
