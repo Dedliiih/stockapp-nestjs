@@ -21,10 +21,7 @@ export class UsersService {
   }
 
   async registerUser(userData: RegisterUserDto) {
-    const [verifyEmail, verifyPhoneNumber] = await Promise.all([
-      this.findUserByEmail(userData.email),
-      this.findUserByPhone(userData.phone),
-    ]);
+    const [verifyEmail, verifyPhoneNumber] = await Promise.all([this.findUserByEmail(userData.email), this.findUserByPhone(userData.phone)]);
 
     if (verifyEmail) throw new BadRequestException('El correo electrónico ya se encuentra registrado');
     if (verifyPhoneNumber) throw new BadRequestException('El número de teléfono ya se encuentra registrado');

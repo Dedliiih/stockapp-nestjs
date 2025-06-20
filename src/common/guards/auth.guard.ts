@@ -10,14 +10,11 @@ import { APP_GUARD } from '@nestjs/core';
 export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
-    private reflector: Reflector,
+    private reflector: Reflector
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]);
 
     if (isPublic) {
       return true;
@@ -30,21 +27,25 @@ export class AuthGuard implements CanActivate {
     try {
       const payload = await this.jwtService.verifyAsync(token, { secret: TOKEN_KEY });
       request['user'] = payload;
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException();
     }
     return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type == 'Bearer' ? token : undefined;
+    const [type, tokenFromHeader] = request.headers.authorization?.split(' ') ?? [];
+    if (type == 'Bearaer') {
+      return tokenFromHeader;
+    }
+
+    return request.cookies?.access_token;
   }
 }
 
 const authGuard = {
   provide: APP_GUARD,
-  useClass: AuthGuard,
+  useClass: AuthGuard
 };
 
 export default authGuard;

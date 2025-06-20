@@ -50,20 +50,14 @@ describe('ProductsService', () => {
       const params: GetProductsParamsDto = { page: 1, limit: 10, filter: undefined };
       const paramsForCall = { ...params };
       await service.getProducts(mockCompanyId, paramsForCall);
-      expect(mockProductsRepository.getAll).toHaveBeenCalledWith(
-        mockCompanyId,
-        expect.objectContaining({ filter: 'nombre' })
-      );
+      expect(mockProductsRepository.getAll).toHaveBeenCalledWith(mockCompanyId, expect.objectContaining({ filter: 'nombre' }));
     });
 
     it('should use the provided valid filter from params', async () => {
       const params: GetProductsParamsDto = { page: 1, limit: 10, filter: 'precio' };
       const paramsForCall = { ...params };
       await service.getProducts(mockCompanyId, paramsForCall);
-      expect(mockProductsRepository.getAll).toHaveBeenCalledWith(
-        mockCompanyId,
-        expect.objectContaining({ filter: 'precio' })
-      );
+      expect(mockProductsRepository.getAll).toHaveBeenCalledWith(mockCompanyId, expect.objectContaining({ filter: 'precio' }));
     });
 
     it('should call productsRepository.getAll with correct companyId and processed params', async () => {
@@ -116,9 +110,7 @@ describe('ProductsService', () => {
 
     it('should call productRepository.createProduct and throw an exception if no product was created', async () => {
       mockProductsRepository.createProduct.mockResolvedValue(notAffectedRowsResponse);
-      await expect(service.create(createProductMock)).rejects.toThrow(
-        new ServiceUnavailableException('Hubo un error al crear el producto.')
-      );
+      await expect(service.create(createProductMock)).rejects.toThrow(new ServiceUnavailableException('Hubo un error al crear el producto.'));
       expect(mockProductsRepository.createProduct).toHaveBeenCalledWith(createProductMock);
     });
   });
@@ -127,23 +119,13 @@ describe('ProductsService', () => {
     it('it should call producstService.updateProduct and update a product by id', async () => {
       mockProductsRepository.updateProduct.mockResolvedValue(affectedRowsResponse);
       await service.update(mockProductId, updateProductMock, mockCompanyId);
-      expect(mockProductsRepository.updateProduct).toHaveBeenCalledWith(
-        mockProductId,
-        updateProductMock,
-        mockCompanyId
-      );
+      expect(mockProductsRepository.updateProduct).toHaveBeenCalledWith(mockProductId, updateProductMock, mockCompanyId);
     });
 
     it('should call productRepository.updateProduct and throw an exception if no product was updated', async () => {
       mockProductsRepository.updateProduct.mockResolvedValue(notAffectedRowsResponse);
-      await expect(service.update(mockProductId, updateProductMock, mockCompanyId)).rejects.toThrow(
-        new ServiceUnavailableException('El producto no fue encontrado.')
-      );
-      expect(mockProductsRepository.updateProduct).toHaveBeenCalledWith(
-        mockProductId,
-        updateProductMock,
-        mockCompanyId
-      );
+      await expect(service.update(mockProductId, updateProductMock, mockCompanyId)).rejects.toThrow(new ServiceUnavailableException('El producto no fue encontrado.'));
+      expect(mockProductsRepository.updateProduct).toHaveBeenCalledWith(mockProductId, updateProductMock, mockCompanyId);
     });
   });
 

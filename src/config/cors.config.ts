@@ -8,7 +8,7 @@ export const CORS_CONFIG = {
       callback(new Error('No permitido por CORS'));
     }
   },
-  methods: 'GET, PUT, PATCH, POST, DELETE',
+  methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE'],
   allowedHeaders: 'Content-Type, Authorization',
-  credentials: true,
+  credentials: true
 };

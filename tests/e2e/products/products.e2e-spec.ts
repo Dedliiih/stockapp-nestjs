@@ -2,12 +2,16 @@ import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { createProductMock, updateProductMock } from '../../utils/productMocks';
-import { restartDB, testDatabaseProvider } from '../../utils/testDatabaseModule';
+import { restartDB, TestDatabaseModule, testDatabaseProvider } from '../../utils/testDatabaseModule';
 import * as mysql from 'mysql2/promise';
 import { JwtService } from '@nestjs/jwt';
 import { AppModule } from 'src/app.module';
 import { ResponseTransformInterceptor } from 'src/common/interceptors/transform-response.interceptor';
 import { Reflector } from '@nestjs/core';
+import { FastifyAdapter } from '@nestjs/platform-fastify';
+import { FastifyInstance } from 'fastify';
+import fastifyCookie from '@fastify/cookie';
+import cookieConfig from 'src/config/fastify.cookies.config';
 
 async function setupTestDB(dbConnection: mysql.Connection) {
   await restartDB(dbConnection);
@@ -30,12 +34,12 @@ type Token = {
 
 describe('Products module e2e', () => {
   let app: INestApplication;
-  let jwtService: JwtService;
   let dbConnection: mysql.Connection;
-  let adminToken: string;
-  let unauthorizedToken: string;
+  let adminCookie: string;
+  let unauthorizedCookie: string;
+  let jwtService: JwtService;
 
-  let adminPayload: Token = {
+  const adminPayload: Token = {
     userId: '2',
     name: 'admin',
     lastName: 'admin',
@@ -43,7 +47,7 @@ describe('Products module e2e', () => {
     role: 5
   };
 
-  let unauthorizedPayload: Token = {
+  const unauthorizedPayload: Token = {
     userId: '2',
     name: 'unauthorized',
     lastName: 'admin',
@@ -59,16 +63,28 @@ describe('Products module e2e', () => {
       .useFactory({ factory: testDatabaseProvider.useFactory })
       .compile();
 
-    app = module.createNestApplication();
+    app = module.createNestApplication(new FastifyAdapter());
     app.useGlobalInterceptors(new ResponseTransformInterceptor(app.get(Reflector)));
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+
+    const fastifyInstance: FastifyInstance = app.getHttpAdapter().getInstance() as FastifyInstance;
+
+    await fastifyInstance.register(fastifyCookie, cookieConfig);
+
     await app.init();
 
-    jwtService = module.get<JwtService>(JwtService);
-    dbConnection = module.get<mysql.Connection>('DATABASE_CONNECTION');
+    await app.getHttpAdapter().getInstance().ready();
 
-    adminToken = jwtService.sign(adminPayload);
-    unauthorizedToken = jwtService.sign(unauthorizedPayload);
+    dbConnection = module.get<mysql.Connection>('DATABASE_CONNECTION');
+    jwtService = module.get<JwtService>(JwtService);
+
+    const isSecure = process.env.NODE_ENV === 'production' ? ' Secure' : '';
+
+    const adminToken = jwtService.sign(adminPayload);
+    adminCookie = `access_token=${adminToken}; Path=/; HttpOnly${isSecure}`;
+
+    const unauthorizedToken = jwtService.sign(unauthorizedPayload);
+    unauthorizedCookie = `access_token=${unauthorizedToken}; Path=/; SameSite=Strict; HttpOnly${isSecure};`;
   });
 
   beforeEach(async () => {
@@ -76,7 +92,6 @@ describe('Products module e2e', () => {
   });
 
   afterAll(async () => {
-    await dbConnection.end();
     await app.close();
   });
 
@@ -94,18 +109,11 @@ describe('Products module e2e', () => {
     });
 
     it('should return 403 Forbbiden if user role is not allowed', () => {
-      return request(app.getHttpServer())
-        .get('/products')
-        .set('Authorization', `Bearer ${unauthorizedToken}`)
-        .expect(403);
+      return request(app.getHttpServer()).get('/products').set('Cookie', unauthorizedCookie).expect(403);
     });
 
     it('should return 200 OK and a list of products for an authorized user', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/products')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .query({ page: 1, limit: 10, filter: 'nombre' })
-        .expect(200);
+      const response = await request(app.getHttpServer()).get('/products').set('Cookie', adminCookie).query({ page: 1, limit: 10, filter: 'nombre' }).expect(200);
 
       expect(response.body).toHaveProperty('products');
       expect(response.body).toHaveProperty('total');
@@ -114,21 +122,13 @@ describe('Products module e2e', () => {
     });
 
     it('should reteurn 400 Bad Request for invalid query parameters', () => {
-      return request(app.getHttpServer())
-        .get('/products')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .query({ page: 'not-a-number' })
-        .expect(400);
+      return request(app.getHttpServer()).get('/products').set('Cookie', adminCookie).query({ page: 'not-a-number' }).expect(400);
     });
   });
 
   describe('POST /products', () => {
     it('should create a new product and return a success message', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/products')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send(createProductMock)
-        .expect(201);
+      const response = await request(app.getHttpServer()).post('/products').set('Cookie', adminCookie).send(createProductMock).expect(201);
 
       expect(response.body).toHaveProperty('message');
       expect(response.body.message).toEqual('Producto añadido correctamente.');
@@ -146,21 +146,13 @@ describe('Products module e2e', () => {
 
       lastProductId = insertProduct.insertId;
 
-      const response = await request(app.getHttpServer())
-        .put(`/products/${lastProductId}`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send(updateProductMock)
-        .expect(200);
+      const response = await request(app.getHttpServer()).put(`/products/${lastProductId}`).set('Cookie', adminCookie).send(updateProductMock).expect(200);
       expect(response.body).toHaveProperty('message');
       expect(response.body.message).toEqual('Producto actualizado correctamente.');
     });
 
     it('should return a 404 not found when a product cannot be found', async () => {
-      return await request(app.getHttpServer())
-        .put(`/products/999999999`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send(updateProductMock)
-        .expect(404);
+      return await request(app.getHttpServer()).put(`/products/999999999`).set('Cookie', adminCookie).send(updateProductMock).expect(404);
     });
   });
 
@@ -175,20 +167,14 @@ describe('Products module e2e', () => {
 
       lastProductId = insertProduct.insertId;
 
-      const response = await request(app.getHttpServer())
-        .delete(`/products/${lastProductId}`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(200);
+      const response = await request(app.getHttpServer()).delete(`/products/${lastProductId}`).set('Cookie', adminCookie).expect(200);
 
       expect(response.body).toHaveProperty('message');
       expect(response.body.message).toEqual('Producto eliminado.');
     });
 
     it('should return a 404 not found when a product cannot be found', async () => {
-      return await request(app.getHttpServer())
-        .delete(`/products/999999999`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(404);
+      return await request(app.getHttpServer()).delete(`/products/999999999`).set('Cookie', adminCookie).expect(404);
     });
   });
 });

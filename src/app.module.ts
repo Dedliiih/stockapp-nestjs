@@ -15,6 +15,6 @@ import rolesGuard from './common/guards/roles.guard';
   imports: [ProductsModule, DatabaseModule, AuthModule, UsersModule, CompaniesModule, CompanyUsersModule],
   controllers: [AppController],
   providers: [AppService, DatabaseService, authGuard, rolesGuard],
-  exports: [DatabaseService],
+  exports: [DatabaseService]
 })
 export class AppModule {}

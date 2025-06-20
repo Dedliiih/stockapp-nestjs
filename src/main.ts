@@ -6,11 +6,16 @@ import { CORS_CONFIG } from './config/cors.config';
 import { ResponseTransformInterceptor } from './common/interceptors/transform-response.interceptor';
 import { swaggerConfig } from './config/swagger.config';
 import { SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
+import cookieConfig from './config/fastify.cookies.config';
+import fastifyCookie from '@fastify/cookie';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
 
   app.enableCors(CORS_CONFIG);
+  app.use(cookieParser());
+  app.register(fastifyCookie, cookieConfig);
   app.useGlobalInterceptors(new ResponseTransformInterceptor(app.get(Reflector)));
   app.useGlobalPipes(
     new ValidationPipe({

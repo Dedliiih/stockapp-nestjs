@@ -8,16 +8,11 @@ import { GetProductsParamsDto } from 'src/modules/products/dto/get-products-pams
 import { ProductsController } from 'src/modules/products/products.controller';
 import { ProductsService } from 'src/modules/products/products.service';
 import ProductsRepository from 'src/modules/products/repository/products.repository';
-import {
-  createProductMock,
-  updateProductMock,
-  mockCompanyId,
-  mockProductId,
-  affectedRowsResponse
-} from '../../utils/productMocks';
+import { createProductMock, updateProductMock, mockCompanyId, mockProductId, affectedRowsResponse } from '../../utils/productMocks';
 import { CreateProductDto } from 'src/modules/products/dto/create-product.dto';
 import { mockProductsRepository } from '../../utils/productMocks';
 import { ResultSetHeader } from 'mysql2';
+import { FastifyAdapter } from '@nestjs/platform-fastify';
 
 const MOCK_USER_PAYLOAD = {
   id: '29',
@@ -50,9 +45,11 @@ describe('ProductsController (Integration)', () => {
       .useValue(mockRolesGuard)
       .compile();
 
-    app = module.createNestApplication();
+    app = module.createNestApplication(new FastifyAdapter());
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
     await app.init();
+
+    await app.getHttpAdapter().getInstance().ready();
 
     productsService = module.get<ProductsService>(ProductsService);
   });
@@ -108,12 +105,10 @@ describe('ProductsController (Integration)', () => {
 
   describe('POST /products (createProduct)', () => {
     it('A new product should be created using productsService, with the new product data sent', async () => {
-      const createProductSpy = jest
-        .spyOn(productsService, 'create')
-        .mockImplementation(async (): Promise<ResultSetHeader> => {
-          const mockResponse = affectedRowsResponse as ResultSetHeader;
-          return mockResponse;
-        });
+      const createProductSpy = jest.spyOn(productsService, 'create').mockImplementation(async (): Promise<ResultSetHeader> => {
+        const mockResponse = affectedRowsResponse as ResultSetHeader;
+        return mockResponse;
+      });
 
       const expectedProduct: CreateProductDto = {
         ...createProductMock,
@@ -134,10 +129,7 @@ describe('ProductsController (Integration)', () => {
         return mockResponse;
       });
 
-      const response = await request(app.getHttpServer())
-        .put(`/products/${mockProductId}`)
-        .send(updateProductMock)
-        .expect(200);
+      const response = await request(app.getHttpServer()).put(`/products/${mockProductId}`).send(updateProductMock).expect(200);
 
       expect(updateProductSpy).toHaveBeenCalledWith(mockProductId, updateProductMock, mockCompanyId);
       expect(response.body).toEqual({ message: 'Producto actualizado correctamente.' });
@@ -146,14 +138,9 @@ describe('ProductsController (Integration)', () => {
     it('If a product cannot be found, productsService throws an exception', async () => {
       const productId = 'non-existing-id';
 
-      const updateProductSpy = jest
-        .spyOn(productsService, 'update')
-        .mockRejectedValue(new NotFoundException('El producto no fue encontrado.'));
+      const updateProductSpy = jest.spyOn(productsService, 'update').mockRejectedValue(new NotFoundException('El producto no fue encontrado.'));
 
-      const response = await request(app.getHttpServer())
-        .put(`/products/${productId}`)
-        .send(updateProductMock)
-        .expect(404);
+      const response = await request(app.getHttpServer()).put(`/products/${productId}`).send(updateProductMock).expect(404);
 
       expect(updateProductSpy).toHaveBeenCalledWith(productId, updateProductMock, mockCompanyId);
       expect(response.body.message).toContain('El producto no fue encontrado.');
@@ -178,9 +165,7 @@ describe('ProductsController (Integration)', () => {
 
       const deleteProductSpy = jest
         .spyOn(productsService, 'remove')
-        .mockRejectedValue(
-          new NotFoundException('El producto no ha podido ser eliminado. Intente de nuevo más tarde.')
-        );
+        .mockRejectedValue(new NotFoundException('El producto no ha podido ser eliminado. Intente de nuevo más tarde.'));
 
       const response = await request(app.getHttpServer()).delete(`/products/${productId}`).expect(404);
 

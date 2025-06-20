@@ -34,9 +34,7 @@ export class DatabaseService implements OnModuleDestroy {
       await this.connection.beginTransaction();
 
       for (const [query, params] of queries) {
-        const processedParams = params.map((param) =>
-          param === ':lastInsertId' && lastInsertId !== undefined ? lastInsertId : param
-        );
+        const processedParams = params.map((param) => (param === ':lastInsertId' && lastInsertId !== undefined ? lastInsertId : param));
 
         const [result] = await this.executeQuery(query, processedParams);
 
@@ -45,7 +43,7 @@ export class DatabaseService implements OnModuleDestroy {
         }
       }
       return await this.connection.commit();
-    } catch (error) {
+    } catch {
       await this.connection.rollback();
       throw new InternalServerErrorException('Hubo un error.');
     }

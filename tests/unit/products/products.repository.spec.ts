@@ -1,15 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DatabaseService } from 'src/database/database/database.service';
 import { GetProductsParamsDto } from 'src/modules/products/dto/get-products-pams.dto';
-import {
-  mockCountResponse,
-  mockCompanyId,
-  mockProductId,
-  mockProductList,
-  affectedRowsResponse,
-  createProductMock,
-  updateProductMock
-} from '../../utils/productMocks';
+import { mockCountResponse, mockCompanyId, mockProductId, mockProductList, affectedRowsResponse, createProductMock, updateProductMock } from '../../utils/productMocks';
 import ProductsRepository from 'src/modules/products/repository/products.repository';
 
 const mockDatabaseService = {
@@ -105,8 +97,7 @@ describe('ProductsRepository', () => {
 
   describe('createProduct', () => {
     it('should call databaseService.insertData and return a response from database', async () => {
-      const expectedQuery =
-        'INSERT into productos (nombre, descripcion, empresa_id, sku, stock, categoria, precio) VALUES (?, ? ,?, ?, ?, ?, ?);';
+      const expectedQuery = 'INSERT into productos (nombre, descripcion, empresa_id, sku, stock, categoria, precio) VALUES (?, ? ,?, ?, ?, ?, ?);';
 
       const expectedParams = [
         createProductMock.name,
