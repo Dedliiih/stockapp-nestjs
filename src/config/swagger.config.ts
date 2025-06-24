@@ -7,6 +7,7 @@ export const swaggerConfig = new DocumentBuilder()
   .addTag('Products', 'Operaciones relacionadas con los productos')
   .addTag('Auth', 'Autenticación de usuarios')
   .addBearerAuth()
+  .addCookieAuth()
   .addGlobalResponse(
     {
       status: 500,

@@ -41,7 +41,7 @@ describe('Auth module E2E', () => {
 
       expect(result.body).toHaveProperty('message');
       expect(result.body.message).toEqual('Credenciales inválidas.');
-      expect(result.body['set-cookie']).toBeUndefined();
+      expect(result.headers['set-cookie']).toBeUndefined();
     });
 
     it('If the login is successful, the response should be a 200 success status code and a cookie will be set.', async () => {
@@ -49,7 +49,23 @@ describe('Auth module E2E', () => {
       const result = await request(app.getHttpServer()).post('/auth/login').send(userCredentials).expect(200);
 
       expect(result.body).toHaveProperty('message');
+      expect(result.body).toHaveProperty('userData');
       expect(result.body.message).toEqual('Sesión iniciada correctamente.');
+      expect(result.headers['set-cookie']).toBeDefined();
+    });
+  });
+
+  describe('POST /auth/refresh', () => {
+    it('It should return a 200 success status code if the refreshed tokens are returned.', async () => {
+      const userCredentials = { password: 'testuser!', email: 'testuser@gmail.com' };
+      const loginWithCredentials = await request(app.getHttpServer()).post('/auth/login').send(userCredentials).expect(200);
+      const userCookie = loginWithCredentials.headers['set-cookie'];
+
+      const result = await request(app.getHttpServer()).post('/auth/refresh').set('Cookie', userCookie).expect(200);
+
+      expect(result.body).toHaveProperty('message');
+      expect(result.body).toHaveProperty('userData');
+      expect(result.body.message).toEqual('Sesión actualizada correctamente.');
       expect(result.headers['set-cookie']).toBeDefined();
     });
   });

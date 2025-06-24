@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database/database.service';
 import { Product } from '../entities/product-entity';
 import { ProductsRepositoryI } from './products.repository.interface';
@@ -21,8 +21,7 @@ class ProductsRepository implements ProductsRepositoryI {
   }
 
   async getById(id: string): Promise<Product> {
-    const query: string =
-      'SELECT nombre, modelo, descripcion, empresa_id, SKU, stock FROM productos WHERE producto_id = ?';
+    const query: string = 'SELECT nombre, modelo, descripcion, empresa_id, SKU, stock FROM productos WHERE producto_id = ?';
     const result: Product[] = await this.databaseService.getData(query, id);
 
     return result.length == 0 ? null : result[0];
@@ -30,17 +29,7 @@ class ProductsRepository implements ProductsRepositoryI {
 
   async getBySearchBar(companyId: string, params: GetProductsParamsDto): Promise<Product[]> {
     const itemsOffset = params.limit * (params.page - 1);
-    const queryParams = [
-      companyId,
-      params.search,
-      params.search,
-      params.search,
-      params.search,
-      params.search,
-      params.search,
-      params.limit,
-      itemsOffset
-    ];
+    const queryParams = [companyId, params.search, params.search, params.search, params.search, params.search, params.search, params.limit, itemsOffset];
 
     const query = `
              SELECT
@@ -67,33 +56,15 @@ class ProductsRepository implements ProductsRepositoryI {
   }
 
   async createProduct(productData: CreateProductDto): Promise<ResultSetHeader> {
-    const query: string =
-      'INSERT into productos (nombre, descripcion, empresa_id, sku, stock, categoria, precio) VALUES (?, ? ,?, ?, ?, ?, ?);';
-    const params = [
-      productData.name,
-      productData.description,
-      productData.company,
-      productData.sku,
-      productData.stock,
-      productData.category,
-      productData.price
-    ];
+    const query: string = 'INSERT into productos (nombre, descripcion, empresa_id, sku, stock, categoria, precio) VALUES (?, ? ,?, ?, ?, ?, ?);';
+    const params = [productData.name, productData.description, productData.company, productData.sku, productData.stock, productData.category, productData.price];
     return await this.databaseService.insertData(query, params);
   }
 
   async updateProduct(productId: string, productData: UpdateProductDto, companyId: string): Promise<ResultSetHeader> {
     const query: string =
       'UPDATE productos SET nombre = IFNULL(?, nombre), descripcion = IFNULL(?, descripcion), sku = IFNULL(?, sku), stock = IFNULL(?, stock), categoria = IFNULL(?, categoria), precio = IFNULL(?, precio) WHERE producto_id = ? AND empresa_id = ?';
-    const params = [
-      productData.name,
-      productData.description,
-      productData.sku,
-      productData.stock,
-      productData.category,
-      productData.price,
-      productId,
-      companyId
-    ];
+    const params = [productData.name, productData.description, productData.sku, productData.stock, productData.category, productData.price, productId, companyId];
     return await this.databaseService.insertData(query, params);
   }
 

@@ -5,10 +5,11 @@ import { DatabaseService } from 'src/database/database/database.service';
 import { CompaniesRepository } from './repository/companies.repository';
 import { AuthService } from '../auth/auth.service';
 import { UsersModule } from '../users/users.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [UsersModule],
+  imports: [UsersModule, AuthModule],
   controllers: [CompaniesController],
-  providers: [CompaniesService, DatabaseService, CompaniesRepository, AuthService],
+  providers: [CompaniesService, DatabaseService, CompaniesRepository, AuthService]
 })
 export class CompaniesModule {}

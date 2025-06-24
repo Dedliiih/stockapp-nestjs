@@ -6,4 +6,5 @@ export class User {
   readonly rol_id: number;
   readonly empresa_id: number;
   readonly contrasena: string;
+  readonly credencial_renovacion: string;
 }

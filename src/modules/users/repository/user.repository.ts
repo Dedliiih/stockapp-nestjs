@@ -21,7 +21,7 @@ class UserRepository implements UserRepositoryI {
   }
 
   async findUserById(userId: string): Promise<User | null> {
-    const query: string = 'SELECT usuario_id, nombre, apellidos, email, rol_id, empresa_id, contrasena FROM usuarios WHERE usuario_id = ?';
+    const query: string = 'SELECT usuario_id, nombre, apellidos, email, rol_id, empresa_id, contrasena, credencial_renovacion FROM usuarios WHERE usuario_id = ?';
     const result: User[] = await this.databaseService.getData(query, [userId]);
     return result.length == 0 ? null : result[0];
   }
