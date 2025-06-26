@@ -12,6 +12,7 @@ import { FastifyAdapter } from '@nestjs/platform-fastify';
 import { FastifyInstance } from 'fastify';
 import fastifyCookie from '@fastify/cookie';
 import cookieConfig from 'src/config/fastify.cookies.config';
+import { TOKEN_KEY } from 'src/modules/auth/constants/constants';
 
 async function setupTestDB(dbConnection: mysql.Connection) {
   await restartDB(dbConnection);
@@ -80,10 +81,10 @@ describe('Products module e2e', () => {
 
     const isSecure = process.env.NODE_ENV === 'production' ? ' Secure' : '';
 
-    const adminToken = jwtService.sign(adminPayload);
+    const adminToken = jwtService.sign(adminPayload, { secret: TOKEN_KEY });
     adminCookie = `access_token=${adminToken}; Path=/; HttpOnly${isSecure}`;
 
-    const unauthorizedToken = jwtService.sign(unauthorizedPayload);
+    const unauthorizedToken = jwtService.sign(unauthorizedPayload, { secret: TOKEN_KEY });
     unauthorizedCookie = `access_token=${unauthorizedToken}; Path=/; SameSite=Strict; HttpOnly${isSecure};`;
   });
 

@@ -49,7 +49,7 @@ describe('Auth module E2E', () => {
       const result = await request(app.getHttpServer()).post('/auth/login').send(userCredentials).expect(200);
 
       expect(result.body).toHaveProperty('message');
-      expect(result.body).toHaveProperty('userData');
+      expect(result.body).toHaveProperty('userProfile');
       expect(result.body.message).toEqual('Sesión iniciada correctamente.');
       expect(result.headers['set-cookie']).toBeDefined();
     });
@@ -64,7 +64,7 @@ describe('Auth module E2E', () => {
       const result = await request(app.getHttpServer()).post('/auth/refresh').set('Cookie', userCookie).expect(200);
 
       expect(result.body).toHaveProperty('message');
-      expect(result.body).toHaveProperty('userData');
+      expect(result.body).toHaveProperty('userProfile');
       expect(result.body.message).toEqual('Sesión actualizada correctamente.');
       expect(result.headers['set-cookie']).toBeDefined();
     });

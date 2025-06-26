@@ -8,8 +8,7 @@ export class CompanyUsersRepository implements CompanyUsersRepositoryI {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async getCompanyUsers(companyId: string): Promise<CompanyUser[]> {
-    const query =
-      'SELECT u.nombre, u.apellidos, u.email, r.nombre as rol from USUARIOS u LEFT JOIN roles r ON u.rol_id = r.rol_id WHERE empresa_id = 94';
+    const query = 'SELECT u.nombre, u.apellidos, u.email, r.nombre as rol from USUARIOS u LEFT JOIN roles r ON u.rol_id = r.rol_id WHERE empresa_id = 94';
     const result: CompanyUser[] = await this.databaseService.getData(query, companyId);
     return result;
   }

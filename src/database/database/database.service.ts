@@ -32,7 +32,6 @@ export class DatabaseService implements OnModuleDestroy {
     let lastInsertId: number | undefined = null;
     try {
       await this.connection.beginTransaction();
-
       for (const [query, params] of queries) {
         const processedParams = params.map((param) => (param === ':lastInsertId' && lastInsertId !== undefined ? lastInsertId : param));
 

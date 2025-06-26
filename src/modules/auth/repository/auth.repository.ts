@@ -9,7 +9,7 @@ class AuthRepository implements AuthRepositoryI {
   async updateRefreshToken(refreshToken: string, userId: string): Promise<ResultSetHeader> {
     const query = 'UPDATE usuarios SET credencial_renovacion = ? WHERE usuario_id = ?';
     const params = [refreshToken, userId];
-    return await this.databaseService.insertData(query, params);
+    return await this.databaseService.transaction([[query, params]]);
   }
 }
 

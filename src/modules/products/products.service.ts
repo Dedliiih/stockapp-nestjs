@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import ProductsRepository from './repository/products.repository';
@@ -50,8 +50,7 @@ export class ProductsService {
 
   async remove(productId: string, companyId: string): Promise<ResultSetHeader> {
     const result: ResultSetHeader = await this.productsRepository.deleteProduct(productId, companyId);
-    if (result.affectedRows === 0)
-      throw new NotFoundException('El producto no ha podido ser eliminado. Intente de nuevo más tarde.');
+    if (result.affectedRows === 0) throw new NotFoundException('El producto no ha podido ser eliminado. Intente de nuevo más tarde.');
     return result;
   }
 }

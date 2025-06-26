@@ -1,3 +1,5 @@
+import { InternalServerErrorException } from '@nestjs/common';
+
 export const CORS_WHITELIST = [process.env.FRONTEND_URL];
 
 export const CORS_CONFIG = {
@@ -5,7 +7,7 @@ export const CORS_CONFIG = {
     if (!origin || CORS_WHITELIST.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(new Error('No permitido por CORS'));
+      callback(new InternalServerErrorException('No permitido por CORS.'));
     }
   },
   methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE'],

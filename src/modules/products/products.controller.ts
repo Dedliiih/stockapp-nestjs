@@ -10,10 +10,9 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 import { ProductDto } from './dto/product.dto';
 import { TransformResponse } from 'src/common/decorators/transform-response.decorator';
 import { PaginatedServiceResponse } from 'src/common/interceptors/transform-response.interceptor';
-import { ApiBadRequestResponse, ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Products')
-@ApiBearerAuth()
 @UseGuards(AuthGuard, RolesGuard)
 @Roles(Role.Ceo, Role.StockController, Role.Admin)
 @Controller('products')

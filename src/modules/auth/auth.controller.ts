@@ -4,61 +4,49 @@ import { SignInDto } from './dto/sign-in.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 import { FastifyReply } from 'fastify';
 import { RefreshTokenGuard } from 'src/common/guards/refresh.guard';
+import { ApiBadRequestResponse, ApiOkResponse, ApiOperation, ApiTags, ApiBody } from '@nestjs/swagger';
+import { AuthSuccessResponseDto } from './dto/auth-success-response.dto';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @ApiBody({ type: SignInDto })
+  @ApiOperation({
+    summary: 'Inicio de sesión para usuarios.',
+    description: 'El usuario enviará su email y contraseñas para iniciar sesión, en caso de ser exitosas se retornará una cookie con un token de acceso y renovación.'
+  })
+  @ApiOkResponse({ description: 'Inicio de sesión exitoso.', type: AuthSuccessResponseDto })
+  @ApiBadRequestResponse({ description: 'Error al iniciar sesión. Posible error en las credenciales enviadas.' })
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async signIn(@Body() signInDto: SignInDto, @Res({ passthrough: true }) response: FastifyReply) {
-    const result = await this.authService.signIn(signInDto);
+  async signIn(@Body() signInDto: SignInDto, @Res({ passthrough: true }) response: FastifyReply): Promise<AuthSuccessResponseDto> {
+    const userProfile = await this.authService.signIn(signInDto, response);
 
-    response.setCookie('access_token', result.accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/',
-      maxAge: 16 * 60 * 1000
-    });
-
-    response.setCookie('refresh_token', result.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/auth/refresh',
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
-
-    return { message: 'Sesión iniciada correctamente.', userData: { name: result.nombre, lastName: result.apellidos, companyId: result.empresa_id, rolId: result.rol_id } };
+    return {
+      message: 'Sesión iniciada correctamente.',
+      userProfile
+    };
   }
 
-  @Public()
+  @ApiOperation({
+    summary: 'Renovación de credenciales para usuarios.',
+    description: 'Cuando la credencial de acceso de un usuario caduque, se llamará a este endpoint para hacer su renovación y se retornarán nuevas cookies con tokens renovados.'
+  })
+  @ApiOkResponse({ description: 'Sesión actualizada correctamente.', type: AuthSuccessResponseDto })
+  @ApiBadRequestResponse({ description: 'Error al renovar las credenciales. Posible error en la credencial de renovación.' })
   @UseGuards(RefreshTokenGuard)
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
-  async refreshToken(@Req() req: any, @Res({ passthrough: true }) response: FastifyReply) {
+  async refreshToken(@Req() req: any, @Res({ passthrough: true }) response: FastifyReply): Promise<AuthSuccessResponseDto> {
     const userId = req.user.userId;
     const oldRefreshToken = req.user.refreshToken;
-    const result = await this.authService.refreshToken(userId, oldRefreshToken);
-
-    response.setCookie('access_token', result.accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/',
-      maxAge: 16 * 60 * 1000
-    });
-
-    response.setCookie('refresh_token', result.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/auth/refresh',
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
-
-    return { message: 'Sesión actualizada correctamente.', userData: { name: result.nombre, lastName: result.apellidos, companyId: result.empresa_id, rolId: result.rol_id } };
+    const userProfile = await this.authService.refreshToken(userId, oldRefreshToken, response);
+    return {
+      message: 'Sesión actualizada correctamente.',
+      userProfile
+    };
   }
 }

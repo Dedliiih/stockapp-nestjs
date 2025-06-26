@@ -22,10 +22,10 @@ export class CompaniesRepository implements CompaniesRepositoryI {
     const queries: any[] = [
       [
         'INSERT into empresas (nombre, fecha, email, telefono, creador_id) VALUES (?, ?, ?, ?, ?)',
-        [createCompanyDto.name, creationDate, createCompanyDto.email, createCompanyDto.phone, ownerId],
+        [createCompanyDto.name, creationDate, createCompanyDto.email, createCompanyDto.phone, ownerId]
       ],
       ['UPDATE usuarios set rol_id = ? WHERE usuario_id = ?', [ownerRol, ownerId]],
-      ['UPDATE usuarios set empresa_id = ? WHERE usuario_id = ?', [':lastInsertId', ownerId]],
+      ['UPDATE usuarios set empresa_id = ? WHERE usuario_id = ?', [':lastInsertId', ownerId]]
     ];
     return await this.databaseService.transaction(queries);
   }
@@ -34,14 +34,13 @@ export class CompaniesRepository implements CompaniesRepositoryI {
     const queries: any[] = [
       ['UPDATE usuarios SET rol_id = NULL, empresa_id = NULL WHERE empresa_id = ?', [companyId]],
       ['DELETE FROM productos WHERE empresa_id = ?', [companyId]],
-      ['DELETE FROM empresas WHERE empresa_id = ?', [companyId]],
+      ['DELETE FROM empresas WHERE empresa_id = ?', [companyId]]
     ];
     return await this.databaseService.transaction(queries);
   }
 
   async updateCompany(companyId: string, companyData: UpdateCompanyDto): Promise<void> {
-    const query: string =
-      'UPDATE empresas SET nombre = IFNULL(?, nombre), email = IFNULL(?, email), telefono = IFNULL(?, telefono) WHERE empresa_id = ?';
+    const query: string = 'UPDATE empresas SET nombre = IFNULL(?, nombre), email = IFNULL(?, email), telefono = IFNULL(?, telefono) WHERE empresa_id = ?';
     const params = [companyData.name, companyData.email, companyData.phone, companyId];
 
     return await this.databaseService.insertData(query, params);

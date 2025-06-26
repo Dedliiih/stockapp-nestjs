@@ -6,14 +6,9 @@ import { SignInDto } from './dto/sign-in.dto';
 import { User } from '../users/entities/user.entity';
 import { REFRESH_TOKEN_KEY, TOKEN_KEY } from './constants/constants';
 import AuthRepository from './repository/auth.repository';
-
-interface Token {
-  userId: string;
-  name: string;
-  lastName: string;
-  companyId: number;
-  role: number;
-}
+import { FastifyReply } from 'fastify';
+import { UserPublicProfileDto } from './dto/user-public-profile.dto';
+import { Token } from 'src/common/interfaces/token';
 
 @Injectable()
 export class AuthService {
@@ -35,6 +30,26 @@ export class AuthService {
     return payload;
   }
 
+  createAccessTokenCookie(response: FastifyReply, accessToken: string) {
+    return response.setCookie('access_token', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 16 * 60 * 1000
+    });
+  }
+
+  createRefreshTokenCookie(response: FastifyReply, refreshToken: string) {
+    return response.setCookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/auth/refresh',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+  }
+
   private async signTokens(payload: Token) {
     const [accessToken, refreshToken] = await Promise.all([
       await this.jwtService.signAsync(payload, { secret: TOKEN_KEY }),
@@ -44,7 +59,7 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async signIn(userData: SignInDto): Promise<{ accessToken: string; refreshToken: string; nombre: string; apellidos: string; empresa_id: number; rol_id: number }> {
+  async signIn(userData: SignInDto, response: FastifyReply): Promise<UserPublicProfileDto> {
     const user: User = await this.usersService.findUserByEmail(userData.email);
     const isCorrect = user === null ? false : await bcrypt.compare(userData.password, user.contrasena);
 
@@ -52,12 +67,23 @@ export class AuthService {
 
     const payload = this.createPayload(user);
 
-    const { nombre, apellidos, empresa_id, rol_id } = user;
+    const userProfile: UserPublicProfileDto = {
+      userId: user.usuario_id,
+      name: user.nombre,
+      lastName: user.apellidos,
+      companyId: user.empresa_id,
+      rolId: user.rol_id
+    };
+
     const { accessToken, refreshToken } = await this.signTokens(payload);
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
     await this.authRepository.updateRefreshToken(hashedRefreshToken, user.usuario_id);
-    return { accessToken, refreshToken, nombre, apellidos, empresa_id, rol_id };
+
+    this.createAccessTokenCookie(response, accessToken);
+    this.createRefreshTokenCookie(response, refreshToken);
+
+    return userProfile;
   }
 
   async updateToken(userId: string) {
@@ -66,7 +92,7 @@ export class AuthService {
     return { token: await this.jwtService.signAsync(payload) };
   }
 
-  async refreshToken(userId: string, oldRefreshToken: string) {
+  async refreshToken(userId: string, oldRefreshToken: string, response: FastifyReply): Promise<UserPublicProfileDto> {
     const user: User = await this.usersService.findUserById(userId);
     if (!user || !user.credencial_renovacion) {
       throw new UnauthorizedException('Acceso denegado.');
@@ -74,18 +100,28 @@ export class AuthService {
 
     const matchToken = await bcrypt.compare(oldRefreshToken, user.credencial_renovacion);
     if (!matchToken) {
+      await this.authRepository.updateRefreshToken(null, userId);
       throw new UnauthorizedException('Acceso denegado');
     }
 
     const payload = this.createPayload(user);
 
+    const userProfile: UserPublicProfileDto = {
+      userId: user.usuario_id,
+      name: user.nombre,
+      lastName: user.apellidos,
+      companyId: user.empresa_id,
+      rolId: user.rol_id
+    };
+
     const { accessToken, refreshToken } = await this.signTokens(payload);
-
-    const { nombre, apellidos, empresa_id, rol_id } = user;
-
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
     await this.authRepository.updateRefreshToken(hashedRefreshToken, userId);
-    return { accessToken, refreshToken, nombre, apellidos, empresa_id, rol_id };
+
+    this.createAccessTokenCookie(response, accessToken);
+    this.createRefreshTokenCookie(response, refreshToken);
+
+    return userProfile;
   }
 }
