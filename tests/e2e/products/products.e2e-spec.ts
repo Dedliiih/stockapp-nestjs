@@ -30,7 +30,7 @@ type Token = {
   name: string;
   lastName: string;
   companyId: number;
-  role: number;
+  role: string;
 };
 
 describe('Products module e2e', () => {
@@ -45,7 +45,7 @@ describe('Products module e2e', () => {
     name: 'admin',
     lastName: 'admin',
     companyId: 1,
-    role: 5
+    role: 'Administrador'
   };
 
   const unauthorizedPayload: Token = {
@@ -53,7 +53,7 @@ describe('Products module e2e', () => {
     name: 'unauthorized',
     lastName: 'admin',
     companyId: 1,
-    role: 7
+    role: 'No autorizado'
   };
 
   beforeAll(async () => {

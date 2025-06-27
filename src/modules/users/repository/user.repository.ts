@@ -9,19 +9,22 @@ class UserRepository implements UserRepositoryI {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async findUserByEmail(email: string): Promise<User | null> {
-    const query: string = 'SELECT usuario_id, nombre, apellidos, email, rol_id, empresa_id, contrasena FROM usuarios WHERE email = ?';
+    const query: string =
+      'SELECT u.usuario_id, u.nombre as nombre, u.apellidos, u.email, r.nombre as rol_id, u.empresa_id, u.contrasena, u.credencial_renovacion FROM usuarios u JOIN roles r on r.rol_id = u.rol_id WHERE email = ?';
     const result: User[] = await this.databaseService.getData(query, [email]);
     return result.length == 0 ? null : result[0];
   }
 
   async findUserByPhone(phone: string): Promise<User | null> {
-    const query: string = 'SELECT usuario_id, nombre, apellidos, email, rol_id, empresa_id, contrasena FROM usuarios WHERE telefono = ?';
+    const query: string =
+      'SELECT u.usuario_id, u.nombre as nombre, u.apellidos, u.email, r.nombre as rol_id, u.empresa_id, u.contrasena, u.credencial_renovacion FROM usuarios u JOIN roles r on r.rol_id = u.rol_id WHERE telefono = ?';
     const result: User[] = await this.databaseService.getData(query, [phone]);
     return result.length == 0 ? null : result[0];
   }
 
   async findUserById(userId: string): Promise<User | null> {
-    const query: string = 'SELECT usuario_id, nombre, apellidos, email, rol_id, empresa_id, contrasena, credencial_renovacion FROM usuarios WHERE usuario_id = ?';
+    const query: string =
+      'SELECT u.usuario_id, u.nombre as nombre, u.apellidos, u.email, r.nombre as rol_id, u.empresa_id, u.contrasena, u.credencial_renovacion FROM usuarios u JOIN roles r on r.rol_id = u.rol_id WHERE usuario_id = ?';
     const result: User[] = await this.databaseService.getData(query, [userId]);
     return result.length == 0 ? null : result[0];
   }

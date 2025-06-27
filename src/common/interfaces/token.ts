@@ -3,5 +3,5 @@ export interface Token {
   name: string;
   lastName: string;
   companyId: number;
-  role: number;
+  role: string;
 }

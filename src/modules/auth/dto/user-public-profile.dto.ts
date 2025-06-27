@@ -14,5 +14,5 @@ export class UserPublicProfileDto {
   companyId: number;
 
   @ApiProperty({ example: 5 })
-  rolId: number;
+  rolId: string;
 }

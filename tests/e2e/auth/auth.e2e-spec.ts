@@ -69,4 +69,27 @@ describe('Auth module E2E', () => {
       expect(result.headers['set-cookie']).toBeDefined();
     });
   });
+
+  describe('GET /auth/me', () => {
+    it('It should return a 200 success status code if the user profile data is returned correctly.', async () => {
+      const userCredentials = { password: 'testuser!', email: 'testuser@gmail.com' };
+      const loginWithCredentials = await request(app.getHttpServer()).post('/auth/login').send(userCredentials).expect(200);
+      const userCookie = loginWithCredentials.headers['set-cookie'];
+
+      const result = await request(app.getHttpServer()).get('/auth/me').set('Cookie', userCookie).expect(200);
+
+      expect(result.body).toHaveProperty('message');
+      expect(result.body).toHaveProperty('userProfile');
+      expect(result.body.message).toEqual('Perfil del usuario obtenido correctamente.');
+      expect(result.body.userProfile).toHaveProperty('userId');
+      expect(result.body.userProfile).toHaveProperty('name');
+      expect(result.body.userProfile).toHaveProperty('lastName');
+      expect(result.body.userProfile).toHaveProperty('companyId');
+      expect(result.body.userProfile).toHaveProperty('rolId');
+    });
+
+    it('It should return a 401 unauthorized status code if the user is not authenticated correctly.', async () => {
+      await request(app.getHttpServer()).get('/auth/me').expect(401);
+    });
+  });
 });

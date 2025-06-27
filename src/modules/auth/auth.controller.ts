@@ -1,4 +1,4 @@
-import { Body, Controller, Post, HttpCode, HttpStatus, Res, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, HttpCode, HttpStatus, Res, Req, UseGuards, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { Public } from 'src/common/decorators/public.decorator';
@@ -6,6 +6,10 @@ import { FastifyReply } from 'fastify';
 import { RefreshTokenGuard } from 'src/common/guards/refresh.guard';
 import { ApiBadRequestResponse, ApiOkResponse, ApiOperation, ApiTags, ApiBody } from '@nestjs/swagger';
 import { AuthSuccessResponseDto } from './dto/auth-success-response.dto';
+import { AuthGuard } from 'src/common/guards/auth.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { Role } from 'src/common/enums/role.enum';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -24,7 +28,6 @@ export class AuthController {
   @Post('login')
   async signIn(@Body() signInDto: SignInDto, @Res({ passthrough: true }) response: FastifyReply): Promise<AuthSuccessResponseDto> {
     const userProfile = await this.authService.signIn(signInDto, response);
-
     return {
       message: 'Sesión iniciada correctamente.',
       userProfile
@@ -46,6 +49,19 @@ export class AuthController {
     const userProfile = await this.authService.refreshToken(userId, oldRefreshToken, response);
     return {
       message: 'Sesión actualizada correctamente.',
+      userProfile
+    };
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.Ceo, Role.Admin, Role.StockController)
+  @HttpCode(HttpStatus.OK)
+  @Get('me')
+  async getProfile(@Req() req: { user?: { userId: string } }): Promise<AuthSuccessResponseDto> {
+    const userId = req.user.userId;
+    const userProfile = await this.authService.getProfile(userId);
+    return {
+      message: 'Perfil del usuario obtenido correctamente.',
       userProfile
     };
   }

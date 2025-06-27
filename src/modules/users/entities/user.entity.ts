@@ -3,7 +3,7 @@ export class User {
   readonly nombre: string;
   readonly apellidos: string;
   readonly email: string;
-  readonly rol_id: number;
+  readonly rol_id: string;
   readonly empresa_id: number;
   readonly contrasena: string;
   readonly credencial_renovacion: string;

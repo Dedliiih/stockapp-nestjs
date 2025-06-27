@@ -34,7 +34,7 @@ export class AuthService {
     return response.setCookie('access_token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       path: '/',
       maxAge: 16 * 60 * 1000
     });
@@ -44,7 +44,7 @@ export class AuthService {
     return response.setCookie('refresh_token', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       path: '/auth/refresh',
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
@@ -105,7 +105,6 @@ export class AuthService {
     }
 
     const payload = this.createPayload(user);
-
     const userProfile: UserPublicProfileDto = {
       userId: user.usuario_id,
       name: user.nombre,
@@ -121,6 +120,20 @@ export class AuthService {
 
     this.createAccessTokenCookie(response, accessToken);
     this.createRefreshTokenCookie(response, refreshToken);
+
+    return userProfile;
+  }
+
+  async getProfile(userId: string): Promise<UserPublicProfileDto> {
+    const user: User = await this.usersService.findUserById(userId);
+
+    const userProfile: UserPublicProfileDto = {
+      userId: user.usuario_id,
+      name: user.nombre,
+      lastName: user.apellidos,
+      companyId: user.empresa_id,
+      rolId: user.rol_id
+    };
 
     return userProfile;
   }
